@@ -1,10 +1,10 @@
 package ua.radio.online.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -37,7 +37,8 @@ fun MiniPlayer(
     Surface(
         tonalElevation = 8.dp,
         shadowElevation = 8.dp,
-        color = MaterialTheme.colorScheme.surface
+        color = MaterialTheme.colorScheme.surface,
+        modifier = Modifier.navigationBarsPadding()
     ) {
         Row(
             modifier = Modifier
