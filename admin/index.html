@@ -53,128 +53,83 @@
       color: var(--text);
       font-size: 0.95rem;
     }
-    input:focus, select:focus {
-      outline: none;
-      border-color: var(--primary);
-    }
+    input:focus, select:focus { outline: none; border-color: var(--primary); }
     .row { display: flex; gap: 12px; flex-wrap: wrap; }
     .row > div { flex: 1; min-width: 140px; }
     .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 10px 18px;
-      border: none;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.15s;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 10px 18px; border: none; border-radius: 8px;
+      font-size: 0.95rem; font-weight: 600; cursor: pointer;
     }
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-primary:hover { background: var(--primary-hover); }
-    .btn-danger {
-      background: transparent;
-      color: var(--danger);
-      border: 1px solid var(--danger);
-    }
+    .btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
     .btn-danger:hover { background: var(--danger); color: #fff; }
-    .btn-ghost {
-      background: var(--surface2);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-    .btn-ghost:hover { background: var(--border); }
+    .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
     .btn-sm { padding: 6px 12px; font-size: 0.85rem; }
     .actions { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
     .station {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 14px 16px;
-      border-radius: 10px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      margin-bottom: 10px;
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 16px; border-radius: 10px;
+      background: var(--surface2); border: 1px solid var(--border); margin-bottom: 10px;
     }
     .station.inactive { opacity: 0.5; }
     .station-info { flex: 1; min-width: 0; }
-    .station-info h3 {
-      font-size: 1rem;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .station-info p {
-      font-size: 0.8rem;
-      color: var(--muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .station-url {
-      font-size: 0.75rem;
-      color: var(--primary);
-      margin-top: 2px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+    .station-info h3 { font-size: 1rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .station-info p { font-size: 0.8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .station-url { font-size: 0.75rem; color: var(--primary); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .station-actions { display: flex; gap: 6px; flex-shrink: 0; }
-    .badge {
-      font-size: 0.7rem;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: var(--success);
-      color: #fff;
-      font-weight: 600;
-      margin-left: 6px;
-    }
+    .badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 999px; background: var(--success); color: #fff; font-weight: 600; margin-left: 6px; }
     .badge.off { background: #6b7280; }
     .toast {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #22c55e;
-      color: #fff;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-weight: 600;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s;
-      z-index: 100;
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #22c55e; color: #fff; padding: 12px 24px; border-radius: 8px;
+      font-weight: 600; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 100;
     }
     .toast.show { opacity: 1; }
     .toast.error { background: #ef4444; }
     .empty { color: var(--muted); text-align: center; padding: 32px 0; }
+    #loginScreen { max-width: 420px; margin: 60px auto; }
+    #app { display: none; }
+    .hint { font-size: 0.8rem; color: var(--muted); margin-top: 8px; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>UA Radio — Адмінка</h1>
-    <p class="subtitle">Керування радіостанціями</p>
+  <!-- Login: secret key only in your browser -->
+  <div id="loginScreen" class="container">
+    <div class="card">
+      <h1 style="font-size:1.4rem;margin-bottom:8px">UA Radio — Вхід</h1>
+      <p class="subtitle" style="margin-bottom:16px">Встав <b>Secret key</b> з Supabase (Settings → API Keys). Зберігається тільки в цьому браузері.</p>
+      <label for="keyInput">Secret / service_role key</label>
+      <input id="keyInput" type="password" placeholder="sb_secret_... або eyJ..." autocomplete="off" />
+      <p class="hint">Project URL уже заданий: foavkstpeuwxbssfgyee.supabase.co</p>
+      <div class="actions">
+        <button class="btn btn-primary" id="loginBtn">Увійти</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="app" class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:4px">
+      <div>
+        <h1>UA Radio — Адмінка</h1>
+        <p class="subtitle">Керування радіостанціями</p>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="logoutBtn">Вийти</button>
+    </div>
 
     <div class="card">
       <h2 id="formTitle">Додати радіо</h2>
       <form id="stationForm">
         <input type="hidden" id="editId" />
-
         <label for="name">Назва *</label>
         <input id="name" required placeholder="Наприклад: Українське радіо" />
-
         <label for="streamUrl">URL стріму *</label>
         <input id="streamUrl" required placeholder="https://... або http://..." />
-
         <label for="description">Опис</label>
         <input id="description" placeholder="Короткий опис" />
-
         <label for="logoUrl">URL логотипу</label>
         <input id="logoUrl" placeholder="https://... (необов'язково)" />
-
         <div class="row">
           <div>
             <label for="sortOrder">Порядок</label>
@@ -188,7 +143,6 @@
             </select>
           </div>
         </div>
-
         <div class="actions">
           <button type="submit" class="btn btn-primary" id="submitBtn">Додати</button>
           <button type="button" class="btn btn-ghost" id="cancelBtn" style="display:none">Скасувати</button>
@@ -205,18 +159,22 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    // === Supabase config ===
     const SUPABASE_URL = 'https://foavkstpeuwxbssfgyee.supabase.co';
-    // Встав Secret key (sb_secret_...) або service_role key
-    const SUPABASE_KEY = 'PASTE_SECRET_KEY_HERE';
+    const STORAGE_KEY = 'ua_radio_admin_key';
 
-    const headers = {
-      'apikey': SUPABASE_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_KEY,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=representation'
-    };
+    let SUPABASE_KEY = localStorage.getItem(STORAGE_KEY) || '';
 
+    function headers() {
+      return {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      };
+    }
+
+    const loginScreen = document.getElementById('loginScreen');
+    const app = document.getElementById('app');
     const listEl = document.getElementById('list');
     const form = document.getElementById('stationForm');
     const formTitle = document.getElementById('formTitle');
@@ -230,6 +188,34 @@
       setTimeout(function () { toast.className = 'toast'; }, 2500);
     }
 
+    function showApp() {
+      loginScreen.style.display = 'none';
+      app.style.display = 'block';
+      loadStations();
+    }
+
+    function showLogin() {
+      app.style.display = 'none';
+      loginScreen.style.display = 'block';
+      document.getElementById('keyInput').value = '';
+    }
+
+    document.getElementById('loginBtn').onclick = function () {
+      var key = document.getElementById('keyInput').value.trim();
+      if (!key) { showToast('Встав ключ', true); return; }
+      SUPABASE_KEY = key;
+      localStorage.setItem(STORAGE_KEY, key);
+      showApp();
+    };
+
+    document.getElementById('logoutBtn').onclick = function () {
+      localStorage.removeItem(STORAGE_KEY);
+      SUPABASE_KEY = '';
+      showLogin();
+    };
+
+    if (SUPABASE_KEY) showApp();
+
     function resetForm() {
       form.reset();
       document.getElementById('editId').value = '';
@@ -239,7 +225,6 @@
       submitBtn.textContent = 'Додати';
       cancelBtn.style.display = 'none';
     }
-
     cancelBtn.onclick = resetForm;
 
     window.editStation = function (s) {
@@ -259,9 +244,8 @@
     window.deleteStation = async function (id, name) {
       if (!confirm('Видалити «' + name + '»?')) return;
       try {
-        const res = await fetch(SUPABASE_URL + '/rest/v1/stations?id=eq.' + id, {
-          method: 'DELETE',
-          headers: headers
+        var res = await fetch(SUPABASE_URL + '/rest/v1/stations?id=eq.' + id, {
+          method: 'DELETE', headers: headers()
         });
         if (!res.ok) throw new Error(await res.text());
         showToast('Видалено');
@@ -273,8 +257,8 @@
 
     form.onsubmit = async function (e) {
       e.preventDefault();
-      const id = document.getElementById('editId').value;
-      const body = {
+      var id = document.getElementById('editId').value;
+      var body = {
         name: document.getElementById('name').value.trim(),
         stream_url: document.getElementById('streamUrl').value.trim(),
         description: document.getElementById('description').value.trim() || null,
@@ -282,20 +266,15 @@
         sort_order: Number(document.getElementById('sortOrder').value) || 0,
         is_active: document.getElementById('isActive').value === 'true'
       };
-
       try {
         var res;
         if (id) {
           res = await fetch(SUPABASE_URL + '/rest/v1/stations?id=eq.' + id, {
-            method: 'PATCH',
-            headers: headers,
-            body: JSON.stringify(body)
+            method: 'PATCH', headers: headers(), body: JSON.stringify(body)
           });
         } else {
           res = await fetch(SUPABASE_URL + '/rest/v1/stations', {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(body)
+            method: 'POST', headers: headers(), body: JSON.stringify(body)
           });
         }
         if (!res.ok) throw new Error(await res.text());
@@ -309,70 +288,52 @@
 
     async function loadStations() {
       try {
-        const res = await fetch(SUPABASE_URL + '/rest/v1/stations?order=sort_order.asc', {
-          headers: headers
+        var res = await fetch(SUPABASE_URL + '/rest/v1/stations?order=sort_order.asc', {
+          headers: headers()
         });
         if (!res.ok) throw new Error(await res.text());
-        const data = await res.json();
+        var data = await res.json();
         document.getElementById('count').textContent = '(' + data.length + ')';
-
         if (!data.length) {
           listEl.innerHTML = '<p class="empty">Немає радіо. Додай перше вище ↑</p>';
           return;
         }
-
         listEl.innerHTML = '';
         data.forEach(function (s) {
           var div = document.createElement('div');
           div.className = 'station' + (s.is_active ? '' : ' inactive');
-
           var info = document.createElement('div');
           info.className = 'station-info';
-
           var h3 = document.createElement('h3');
           h3.appendChild(document.createTextNode(s.name + ' '));
           var badge = document.createElement('span');
           badge.className = 'badge' + (s.is_active ? '' : ' off');
           badge.textContent = s.is_active ? 'ON' : 'OFF';
           h3.appendChild(badge);
-
           var p = document.createElement('p');
           p.textContent = s.description || '';
-
           var url = document.createElement('div');
           url.className = 'station-url';
           url.textContent = s.stream_url;
-
-          info.appendChild(h3);
-          info.appendChild(p);
-          info.appendChild(url);
-
+          info.appendChild(h3); info.appendChild(p); info.appendChild(url);
           var actions = document.createElement('div');
           actions.className = 'station-actions';
-
           var editBtn = document.createElement('button');
           editBtn.className = 'btn btn-ghost btn-sm';
           editBtn.textContent = '✏️';
           editBtn.onclick = function () { window.editStation(s); };
-
           var delBtn = document.createElement('button');
           delBtn.className = 'btn btn-danger btn-sm';
           delBtn.textContent = '🗑';
           delBtn.onclick = function () { window.deleteStation(s.id, s.name); };
-
-          actions.appendChild(editBtn);
-          actions.appendChild(delBtn);
-
-          div.appendChild(info);
-          div.appendChild(actions);
+          actions.appendChild(editBtn); actions.appendChild(delBtn);
+          div.appendChild(info); div.appendChild(actions);
           listEl.appendChild(div);
         });
       } catch (e) {
-        listEl.innerHTML = '<p class="empty">Помилка: ' + e.message + '. Перевір SUPABASE_KEY у index.html</p>';
+        listEl.innerHTML = '<p class="empty">Помилка: ' + e.message + '. Можливо неправильний ключ — натисни Вийти і встав Secret key знову.</p>';
       }
     }
-
-    loadStations();
   </script>
 </body>
 </html>
