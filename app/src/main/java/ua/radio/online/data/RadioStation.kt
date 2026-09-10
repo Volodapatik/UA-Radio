@@ -1,14 +1,15 @@
 package ua.radio.online.data
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class RadioStation(
     val id: String = "",
     val name: String,
-    val streamUrl: String,
-    val logoUrl: String? = null,
+    @SerialName("stream_url") val streamUrl: String,
+    @SerialName("logo_url") val logoUrl: String? = null,
     val description: String? = null,
-    val isActive: Boolean = true,
-    val sortOrder: Int = 0
+    @SerialName("is_active") val isActive: Boolean = true,
+    @SerialName("sort_order") val sortOrder: Int = 0
 )
