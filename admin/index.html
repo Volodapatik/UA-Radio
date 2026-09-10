@@ -12,7 +12,6 @@
       --primary: #3b82f6;
       --primary-hover: #2563eb;
       --danger: #ef4444;
-      --danger-hover: #dc2626;
       --text: #e6edf3;
       --muted: #8b949e;
       --border: #30363d;
@@ -45,7 +44,7 @@
       margin-top: 12px;
     }
     label:first-of-type { margin-top: 0; }
-    input, textarea {
+    input, select {
       width: 100%;
       padding: 10px 12px;
       border-radius: 8px;
@@ -54,11 +53,10 @@
       color: var(--text);
       font-size: 0.95rem;
     }
-    input:focus, textarea:focus {
+    input:focus, select:focus {
       outline: none;
       border-color: var(--primary);
     }
-    textarea { resize: vertical; min-height: 60px; }
     .row { display: flex; gap: 12px; flex-wrap: wrap; }
     .row > div { flex: 1; min-width: 140px; }
     .btn {
@@ -76,9 +74,17 @@
     }
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-primary:hover { background: var(--primary-hover); }
-    .btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
+    .btn-danger {
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
     .btn-danger:hover { background: var(--danger); color: #fff; }
-    .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
     .btn-ghost:hover { background: var(--border); }
     .btn-sm { padding: 6px 12px; font-size: 0.85rem; }
     .actions { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
@@ -121,9 +127,10 @@
       font-size: 0.7rem;
       padding: 2px 8px;
       border-radius: 999px;
-      background: var(--success, #22c55e);
+      background: var(--success);
       color: #fff;
       font-weight: 600;
+      margin-left: 6px;
     }
     .badge.off { background: #6b7280; }
     .toast {
@@ -143,24 +150,19 @@
     }
     .toast.show { opacity: 1; }
     .toast.error { background: #ef4444; }
-    .empty { color: #8b949e; text-align: center; padding: 32px 0; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 8px; }
-    .form-title { margin-bottom: 4px; }
+    .empty { color: var(--muted); text-align: center; padding: 32px 0; }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="header">
-      <div>
-        <h1>UA Radio — Адмінка</h1>
-        <p class="subtitle">Керування радіостанціями</p>
-      </div>
-    </div>
+    <h1>UA Radio — Адмінка</h1>
+    <p class="subtitle">Керування радіостанціями</p>
 
     <div class="card">
-      <h2 class="form-title" id="formTitle">Додати радіо</h2>
+      <h2 id="formTitle">Додати радіо</h2>
       <form id="stationForm">
         <input type="hidden" id="editId" />
+
         <label for="name">Назва *</label>
         <input id="name" required placeholder="Наприклад: Українське радіо" />
 
@@ -180,7 +182,7 @@
           </div>
           <div>
             <label for="isActive">Активне</label>
-            <select id="isActive" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:0.95rem;">
+            <select id="isActive">
               <option value="true">Так</option>
               <option value="false">Ні</option>
             </select>
@@ -203,13 +205,14 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    // ⚠️ Встав свої ключі нижче (з Supabase → Settings → API Keys)
+    // === Supabase config ===
     const SUPABASE_URL = 'https://foavkstpeuwxbssfgyee.supabase.co';
-    const SUPABASE_KEY = 'PASTE_SECRET_OR_SERVICE_ROLE_KEY_HERE';
+    // Встав Secret key (sb_secret_...) або service_role key
+    const SUPABASE_KEY = 'PASTE_SECRET_KEY_HERE';
 
     const headers = {
       'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
       'Content-Type': 'application/json',
       'Prefer': 'return=representation'
     };
@@ -221,56 +224,10 @@
     const cancelBtn = document.getElementById('cancelBtn');
     const toast = document.getElementById('toast');
 
-    function showToast(msg, isError = false) {
+    function showToast(msg, isError) {
       toast.textContent = msg;
       toast.className = 'toast show' + (isError ? ' error' : '');
-      setTimeout(() => toast.className = 'toast', 2500);
-    }
-
-    async function loadStations() {
-      try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/stations?order=sort_order.asc`, { headers });
-        if (!res.ok) throw new Error(await res.text());
-        const data = await res.json();
-        document.getElementById('count').textContent = `(${data.length})`;
-        if (!data.length) {
-          listEl.innerHTML = '<p class="empty">Немає радіо. Додай перше вище ↑</p>';
-          return;
-        }
-        listEl.innerHTML = data.map(s => `
-          <div class="station ${s.is_active ? '' : 'inactive'}">
-            <div class="station-info">
-              <h3>${escapeHtml(s.name)} <span class="badge ${s.is_active ? '' : 'off'}">${s.is_active ? 'ON' : 'OFF'}</span></h3>
-              <p>${escapeHtml(s.description || '')}</p>
-              <div class="station-url">${escapeHtml(s.stream_url)}</div>
-            </div>
-            <div class="station-actions">
-              <button class="btn btn-ghost btn-sm" onclick='editStation(${JSON.stringify(s).replace(/'/g, "&#39;")})'>✏️</button>
-              <button class="btn btn-danger btn-sm" onclick="deleteStation('${s.id}', '${escapeHtml(s.name)}')">🗑</button>
-            </div>
-          </div>
-        `).join('');
-      } catch (e) {
-        listEl.innerHTML = `<p class="empty">Помилка завантаження: ${escapeHtml(e.message)}</p>`;
-      }
-    }
-
-    function escapeHtml(str) {
-      return String(str || '').replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"');
-    }
-
-    function editStation(s) {
-      document.getElementById('editId').value = s.id;
-      document.getElementById('name').value = s.name;
-      document.getElementById('streamUrl').value = s.stream_url;
-      document.getElementById('description').value = s.description || '';
-      document.getElementById('logoUrl').value = s.logo_url || '';
-      document.getElementById('sortOrder').value = s.sort_order || 0;
-      document.getElementById('isActive').value = String(s.is_active);
-      formTitle.textContent = 'Редагувати радіо';
-      submitBtn.textContent = 'Зберегти';
-      cancelBtn.style.display = 'inline-flex';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(function () { toast.className = 'toast'; }, 2500);
     }
 
     function resetForm() {
@@ -285,60 +242,7 @@
 
     cancelBtn.onclick = resetForm;
 
-    form.onsubmit = async (e) => {
-      e.preventDefault();
-      const id = document.getElementById('editId').value;
-      const body = {
-        name: document.getElementById('name').value.trim(),
-        stream_url: document.getElementById('streamUrl').value.trim(),
-        description: document.getElementById('description').value.trim() || null,
-        logo_url: document.getElementById('logoUrl').value.trim() || null,
-        sort_order: Number(document.getElementById('sortOrder').value) || 0,
-        is_active: document.getElementById('isActive').value === 'true'
-      };
-
-      try {
-        let res;
-        if (id) {
-          res = await fetch(`${SUPABASE_URL}/rest/v1/stations?id=eq.${id}`, {
-            method: 'PATCH',
-            headers,
-            body: JSON.stringify(body)
-          });
-        } else {
-          res = await fetch(`${SUPABASE_URL}/rest/v1/stations`, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(body)
-          });
-        }
-        if (!res.ok) throw new Error(await res.text());
-        showToast(id ? 'Збережено!' : 'Додано!');
-        resetForm();
-        loadStations();
-      } catch (err) {
-        showToast('Помилка: ' + err.message, true);
-      }
-    };
-
-    async function deleteStation(id, name) {
-      if (!confirm(`Видалити «${name}»?`)) return;
-      try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/stations?id=eq.${id}`, {
-          method: 'DELETE',
-          headers
-        });
-        if (!res.ok) throw new Error(await res.text());
-        showToast('Видалено');
-        loadStations();
-      } catch (err) {
-        showToast('Помилка: ' + err.message, true);
-      }
-    }
-
-    // Fix editStation to work without broken JSON in HTML
-    window.editStation = function(s) {
-      if (typeof s === 'string') s = JSON.parse(s);
+    window.editStation = function (s) {
       document.getElementById('editId').value = s.id;
       document.getElementById('name').value = s.name;
       document.getElementById('streamUrl').value = s.stream_url;
@@ -352,48 +256,119 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    window.deleteStation = deleteStation;
+    window.deleteStation = async function (id, name) {
+      if (!confirm('Видалити «' + name + '»?')) return;
+      try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/stations?id=eq.' + id, {
+          method: 'DELETE',
+          headers: headers
+        });
+        if (!res.ok) throw new Error(await res.text());
+        showToast('Видалено');
+        loadStations();
+      } catch (err) {
+        showToast('Помилка: ' + err.message, true);
+      }
+    };
 
-    // Safer list rendering
+    form.onsubmit = async function (e) {
+      e.preventDefault();
+      const id = document.getElementById('editId').value;
+      const body = {
+        name: document.getElementById('name').value.trim(),
+        stream_url: document.getElementById('streamUrl').value.trim(),
+        description: document.getElementById('description').value.trim() || null,
+        logo_url: document.getElementById('logoUrl').value.trim() || null,
+        sort_order: Number(document.getElementById('sortOrder').value) || 0,
+        is_active: document.getElementById('isActive').value === 'true'
+      };
+
+      try {
+        var res;
+        if (id) {
+          res = await fetch(SUPABASE_URL + '/rest/v1/stations?id=eq.' + id, {
+            method: 'PATCH',
+            headers: headers,
+            body: JSON.stringify(body)
+          });
+        } else {
+          res = await fetch(SUPABASE_URL + '/rest/v1/stations', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(body)
+          });
+        }
+        if (!res.ok) throw new Error(await res.text());
+        showToast(id ? 'Збережено!' : 'Додано!');
+        resetForm();
+        loadStations();
+      } catch (err) {
+        showToast('Помилка: ' + err.message, true);
+      }
+    };
+
     async function loadStations() {
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/stations?order=sort_order.asc`, { headers });
+        const res = await fetch(SUPABASE_URL + '/rest/v1/stations?order=sort_order.asc', {
+          headers: headers
+        });
         if (!res.ok) throw new Error(await res.text());
         const data = await res.json();
-        document.getElementById('count').textContent = `(${data.length})`;
+        document.getElementById('count').textContent = '(' + data.length + ')';
+
         if (!data.length) {
           listEl.innerHTML = '<p class="empty">Немає радіо. Додай перше вище ↑</p>';
           return;
         }
+
         listEl.innerHTML = '';
-        data.forEach(s => {
-          const div = document.createElement('div');
+        data.forEach(function (s) {
+          var div = document.createElement('div');
           div.className = 'station' + (s.is_active ? '' : ' inactive');
-          div.innerHTML = `
-            <div class="station-info">
-              <h3></h3>
-              <p></p>
-              <div class="station-url"></div>
-            </div>
-            <div class="station-actions">
-              <button class="btn btn-ghost btn-sm edit-btn">✏️</button>
-              <button class="btn btn-danger btn-sm del-btn">🗑</button>
-            </div>
-          `;
-          div.querySelector('h3').innerHTML = '';
-          div.querySelector('h3').appendChild(document.createTextNode(s.name + ' '));
-          const badge = document.createElement('span');
+
+          var info = document.createElement('div');
+          info.className = 'station-info';
+
+          var h3 = document.createElement('h3');
+          h3.appendChild(document.createTextNode(s.name + ' '));
+          var badge = document.createElement('span');
           badge.className = 'badge' + (s.is_active ? '' : ' off');
           badge.textContent = s.is_active ? 'ON' : 'OFF';
-          div.querySelector('h3').appendChild(badge);
-          div.querySelector('p').textContent = s.description || '';
-          div.querySelector('.station-url').textContent = s.stream_url;
-          div.querySelector('.edit-btn').onclick = () => window.editStation(s);
-          div.querySelector('.del-btn').onclick = () => window.deleteStation(s.id, s.name);
+          h3.appendChild(badge);
+
+          var p = document.createElement('p');
+          p.textContent = s.description || '';
+
+          var url = document.createElement('div');
+          url.className = 'station-url';
+          url.textContent = s.stream_url;
+
+          info.appendChild(h3);
+          info.appendChild(p);
+          info.appendChild(url);
+
+          var actions = document.createElement('div');
+          actions.className = 'station-actions';
+
+          var editBtn = document.createElement('button');
+          editBtn.className = 'btn btn-ghost btn-sm';
+          editBtn.textContent = '✏️';
+          editBtn.onclick = function () { window.editStation(s); };
+
+          var delBtn = document.createElement('button');
+          delBtn.className = 'btn btn-danger btn-sm';
+          delBtn.textContent = '🗑';
+          delBtn.onclick = function () { window.deleteStation(s.id, s.name); };
+
+          actions.appendChild(editBtn);
+          actions.appendChild(delBtn);
+
+          div.appendChild(info);
+          div.appendChild(actions);
           listEl.appendChild(div);
         });
       } catch (e) {
-        listEl.innerHTML = `<p class="empty">Помилка: ${escapeHtml(e.message)}. Перевір SUPABASE_KEY у index.html</p>`;
+        listEl.innerHTML = '<p class="empty">Помилка: ' + e.message + '. Перевір SUPABASE_KEY у index.html</p>';
       }
     }
 
