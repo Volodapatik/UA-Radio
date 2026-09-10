@@ -1,8 +1,7 @@
 package ua.radio.online.data
 
 /**
- * Тестові радіостанції.
- * Пізніше будуть замінені на дані з Supabase через адмінку.
+ * Fallback, якщо немає інтернету або Supabase недоступний.
  */
 object TestStations {
     val list = listOf(
