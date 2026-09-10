@@ -20,7 +20,7 @@ class StationsRepository {
                 requestMethod = "GET"
                 setRequestProperty("apikey", SupabaseConfig.ANON_KEY)
                 setRequestProperty("Authorization", "Bearer ${SupabaseConfig.ANON_KEY}")
-                setRequestProperty("Accept", "application/json"
+                setRequestProperty("Accept", "application/json")
                 connectTimeout = 15000
                 readTimeout = 15000
             }
