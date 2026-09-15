@@ -22,8 +22,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import ua.radio.online.data.RadioStation
 import ua.radio.online.data.StationsRepository
@@ -49,7 +47,15 @@ fun RadioApp() {
         scope.launch {
             if (showSpinner) isRefreshing = true
             val list = repository.fetchStations()
-            stations = list
+            // Не перемальовуємо список, якщо дані ті самі
+            val same = stations.size == list.size &&
+                stations.zip(list).all { (a, b) ->
+                    a.id == b.id && a.name == b.name && a.streamUrl == b.streamUrl &&
+                        a.description == b.description && a.isActive == b.isActive
+                }
+            if (!same) {
+                stations = list
+            }
             isLoading = false
             isRefreshing = false
         }
@@ -60,12 +66,11 @@ fun RadioApp() {
         onDispose { playerController.release() }
     }
 
-    // Перше завантаження
     LaunchedEffect(Unit) {
         refresh()
     }
 
-    // Оновлення при поверненні в додаток
+    // Оновлення тільки при поверненні в додаток (без таймера кожні 45с — менше лагів)
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
@@ -76,16 +81,11 @@ fun RadioApp() {
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    // Автооновлення кожні 45 секунд, поки додаток відкритий
-    LaunchedEffect(Unit) {
-        while (isActive) {
-            delay(45_000)
-            refresh()
-        }
-    }
-
     val isPlaying by playerController.isPlaying.collectAsState()
     val currentStation by playerController.currentStation.collectAsState()
+
+    val playHandler = remember(playerController) { { s: RadioStation -> playerController.play(s) } }
+    val pauseHandler = remember(playerController) { { playerController.pause() } }
 
     Scaffold(
         bottomBar = {
@@ -107,17 +107,18 @@ fun RadioApp() {
             if (isLoading && stations.isEmpty()) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             } else {
+                val displayList = if (stations.isEmpty()) TestStations.list else stations
                 PullToRefreshBox(
                     isRefreshing = isRefreshing,
                     onRefresh = { refresh(showSpinner = true) },
                     modifier = Modifier.fillMaxSize()
                 ) {
                     StationsScreen(
-                        stations = stations.ifEmpty { TestStations.list },
+                        stations = displayList,
                         currentStationId = currentStation?.id,
                         isPlaying = isPlaying,
-                        onPlay = { station -> playerController.play(station) },
-                        onPause = { playerController.pause() }
+                        onPlay = playHandler,
+                        onPause = pauseHandler
                     )
                 }
             }
