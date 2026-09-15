@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -14,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -43,17 +43,27 @@ fun StationsScreen(
         )
 
         LazyColumn(
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.fillMaxSize()
         ) {
-            items(stations, key = { it.id }) { station ->
+            items(
+                items = stations,
+                key = { it.id },
+                contentType = { "station" }
+            ) { station ->
+                val isCurrent = station.id == currentStationId
+                val playing = isCurrent && isPlaying
+                // Стабільні колбеки для цієї станції
+                val playClick = remember(station.id) { { onPlay(station) } }
+                val pauseClick = remember(station.id) { onPause }
+
                 StationCard(
                     station = station,
-                    isCurrent = station.id == currentStationId,
-                    isPlaying = isPlaying && station.id == currentStationId,
-                    onPlay = { onPlay(station) },
-                    onPause = onPause,
+                    isCurrent = isCurrent,
+                    isPlaying = playing,
+                    onPlay = playClick,
+                    onPause = pauseClick,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
